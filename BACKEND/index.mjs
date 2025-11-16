@@ -23,11 +23,6 @@ app.use(rutasApiCliente);
 
 
 
-app.listen(PUERTO, () => {
-    console.log(`Servidor escuchando en el puerto ${PUERTO} (Modo Local)`);
-    console.log('API: http://localhost:3000');
-});
-
 
 // EXPORTACIÓN CLAVE PARA VERCELL
 export default app;
