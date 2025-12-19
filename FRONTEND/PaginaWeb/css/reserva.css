@@ -1,33 +1,74 @@
-/* styles.css - Estilos del Formulario de Reserva */
+/* styles.css - Estilos Premium Glassmorphism */
 
 /* ============================================
    CONTENEDOR PRINCIPAL
    ============================================ */
 .contenedor-pasos-reserva {
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(24px) saturate(180%);
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    align-items: stretch;
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 0 40px rgba(0, 0, 0, 0.3) inset;
     margin: 0 auto;
-    /* Agregando padding específico para móvil - 1rem lateral consistente */
-    padding: 1rem;
-    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    border-radius: 24px;
     width: 100%;
-    /* Reduciendo ancho máximo de 500px a 420px */
-    max-width: 420px;
-    /* Reduciendo altura mínima de 550px a 450px */
-    min-height: 450px;
-    background: rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 520px;
+    min-width: 100%;
+    min-height: 520px;
+    background: linear-gradient(
+        135deg,
+        rgba(20, 20, 20, 0.7) 0%,
+        rgba(10, 10, 10, 0.5) 50%,
+        rgba(15, 15, 15, 0.6) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    position: relative;
+    overflow: hidden;
+}
+
+.contenedor-pasos-reserva::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at top,
+        rgba(255, 255, 255, 0.05) 0%,
+        transparent 70%
+    );
+    pointer-events: none;
+}
+
+.contenedor-pasos-reserva::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
 }
 
 .reserva-turno h2 {
     color: var(--clr-blanco);
     text-transform: uppercase;
-    font-weight: 300;
-    letter-spacing: 1px;
+    font-weight: 200;
+    letter-spacing: 4px;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
 /* ============================================
@@ -37,45 +78,67 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Reduciendo padding de 2rem a 1rem */
-    padding-bottom: 1rem;
-    /* Reduciendo gap de 0.75rem a 0.5rem */
-    gap: 0.5rem;
+    padding-bottom: 1.75rem;
+    gap: 0.4rem;
     width: 100%;
     flex-wrap: wrap;
+    position: relative;
 }
 
 .indicador-progreso__paso {
-    /* Reduciendo tamaño de 2.5rem a 2rem */
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Reduciendo font-size de 0.9rem a 0.8rem */
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(30px);
-    color: rgba(255, 255, 255, 0.6);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(145deg, rgba(30, 30, 30, 0.8), rgba(15, 15, 15, 0.8));
+    backdrop-filter: blur(20px);
+    color: rgba(255, 255, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: default;
+    position: relative;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.indicador-progreso__paso::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.4s ease;
 }
 
 .indicador-progreso__paso--activo {
-    background-color: #1a1a1a;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(200, 200, 200, 0.1));
     color: white;
-    border-color: var(--clr-blanco);
+    border-color: rgba(255, 255, 255, 0.4);
     transform: scale(1.15);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+}
+
+.indicador-progreso__paso--activo::before {
+    opacity: 1;
 }
 
 .indicador-progreso__paso--completado {
-    background-color: rgba(100, 100, 100, 0.4);
-    border-color: rgba(150, 150, 150, 0.5);
-    color: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(145deg, rgba(80, 80, 80, 0.6), rgba(60, 60, 60, 0.6));
+    border-color: rgba(180, 180, 180, 0.4);
+    color: rgba(255, 255, 255, 0.85);
 }
 
 /* ============================================
@@ -108,82 +171,113 @@
     align-items: center;
     gap: 1rem;
     width: 100%;
-    /* Reduciendo margin-bottom de 1.5rem a 1rem */
-    margin-bottom: 1rem;
-    /* Reduciendo padding-bottom de 1rem a 0.75rem */
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+}
+
+.paso__encabezado::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 80px;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.6),
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    border-radius: 2px;
+}
+
+.paso__icono {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, rgba(50, 50, 50, 0.5), rgba(30, 30, 30, 0.5));
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    flex-shrink: 0;
 }
 
 .paso__encabezado h2 {
     margin-bottom: 0;
     color: var(--clr-blanco);
-    text-transform: uppercase;
-    font-weight: 300;
-    /* Reduciendo font-size de 1.25rem a 1.1rem */
-    font-size: 1.1rem;
-    letter-spacing: 0.5px;
+    text-transform: none;
+    font-weight: 400;
+    font-size: 1.15rem;
+    letter-spacing: 1px;
+    flex: 1;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* ============================================
    GRIDS - RESPONSIVOS
    ============================================ */
-.servicios-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    /* Reduciendo gap de 1rem a 0.75rem */
-    gap: 0.75rem;
-    /* Reduciendo margin-top de 1rem a 0.5rem */
-    margin-top: 0.5rem;
-    width: 100%;
-}
-
+.servicios-grid,
 .barberos-grid {
     display: grid;
     grid-template-columns: 1fr;
-    /* Reduciendo gap de 1rem a 0.75rem */
-    gap: 0.75rem;
+    gap: 0.9rem;
     width: 100%;
+}
+
+.servicios-grid {
+    margin-top: 0;
 }
 
 .fechas-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    /* Reduciendo gap de 0.75rem a 0.5rem */
-    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+    gap: 0.65rem;
     width: 100%;
 }
 
 .horarios-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    /* Reduciendo gap de 0.75rem a 0.5rem */
-    gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+    gap: 0.65rem;
     width: 100%;
 }
 
 .mensaje-sin-horarios {
     display: none;
-    color: var(--clr-blanco);
+    color: rgba(255, 255, 255, 0.8);
     text-align: center;
-    padding: 2rem;
+    padding: 2.5rem 1.5rem;
     font-size: 0.95rem;
+    font-weight: 300;
+    letter-spacing: 0.5px;
 }
 
 /* ============================================
    TARJETAS (Elementos de Selección)
    ============================================ */
 .tarjeta {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(
+        145deg,
+        rgba(40, 40, 40, 0.4),
+        rgba(25, 25, 25, 0.3)
+    );
+    backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     cursor: pointer;
-    border-radius: 12px;
-    /* Reduciendo padding de 1rem a 0.75rem */
+    border-radius: 16px;
     padding: 0.75rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 }
 
 .tarjeta::before {
@@ -193,47 +287,93 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.12) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 100%
+    );
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.35s ease;
+}
+
+.tarjeta::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transition: left 0.6s ease;
 }
 
 .tarjeta:hover {
-    border-color: rgba(255, 255, 255, 0.5);
-    background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.25);
+    background: linear-gradient(
+        145deg,
+        rgba(60, 60, 60, 0.5),
+        rgba(35, 35, 35, 0.4)
+    );
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 
+        0 16px 40px rgba(0, 0, 0, 0.5),
+        0 0 30px rgba(255, 255, 255, 0.05),
+        0 0 0 1px rgba(255, 255, 255, 0.15) inset;
 }
 
 .tarjeta:hover::before {
     opacity: 1;
 }
 
+.tarjeta:hover::after {
+    left: 100%;
+}
+
 .tarjeta:active {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1);
 }
 
 .tarjeta__encabezado {
-    /* Reduciendo padding de 0 0 0.75rem 0 a 0 0 0.5rem 0 */
-    padding: 0 0 0.5rem 0;
+    padding: 0 0 0.75rem 0;
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-    /* Reduciendo margin-bottom de 0.75rem a 0.5rem */
-    margin-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 0.75rem;
+    position: relative;
+}
+
+.tarjeta__encabezado::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
 }
 
 .tarjeta__titulo {
-    /* Reduciendo font-size de 1.1rem a 1rem */
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 400;
-    text-transform: uppercase;
+    text-transform: none;
     color: var(--clr-blanco);
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .tarjeta__contenido {
-    /* Reduciendo padding de 0.5rem a 0.25rem */
-    padding: 0.25rem;
+    padding: 0.5rem;
     color: var(--clr-blanco);
     position: relative;
     z-index: 5;
@@ -243,12 +383,11 @@
    TARJETAS ESPECÍFICAS
    ============================================ */
 .tarjeta-servicio__descripcion {
-    /* Reduciendo font-size de 0.85rem a 0.8rem */
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.85);
-    /* Reduciendo margin-bottom de 0.75rem a 0.5rem */
-    margin-bottom: 0.5rem;
-    line-height: 1.5;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    letter-spacing: 0.3px;
 }
 
 .tarjeta-servicio__detalles {
@@ -526,6 +665,11 @@
     }
 
     .servicios-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .barberos-grid {
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
     }
