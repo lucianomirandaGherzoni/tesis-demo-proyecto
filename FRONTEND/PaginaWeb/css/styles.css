@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Manrope:wght@200..800&display=swap');
 
 :root {
     --clr-oscuro: black;
     --clr-blanco: white;
+    --font-principal: 'Manrope', sans-serif;
+    --font-mono: 'Geist Mono', monospace;
 }
 
 * {
@@ -14,26 +15,36 @@
 
 html {
     scroll-behavior: smooth;
-    /* Ya lo tienes, déjalo */
     scroll-padding-top: 6rem;
-    /* Ajusta este valor al alto de tu navbar */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) #000000;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    background-color: #000000;
+}
+
+::-webkit-scrollbar-track {
+    background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 body {
-    font-family: "DM Sans", sans-serif;
+    font-family: var(--font-principal);
     font-optical-sizing: auto;
     font-weight: 300;
     font-style: normal;
     color: var(--clr-oscuro);
-
-    /*    background-image: url('./img/fondo-negro.png');
-    background-position: center center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-attachment: fixed; */
-
 }
-
 
 .fixed-background {
     position: fixed;
@@ -771,6 +782,7 @@ h2 {
     margin-top: .5rem;
     color: var(--clr-oscuro);
     letter-spacing: 4px;
+    margin-bottom: 2rem;
 }
 
 /* Services */
@@ -1567,6 +1579,7 @@ body {
 
     .reserva-turno h2 {
         color: var(--clr-blanco);
+        text-align: center;
     }
 
     .imagen-reserva img {
