@@ -510,8 +510,8 @@ i {
 
 .motivational-text {
     color: var(--clr-oscuro);
-    font-size: 6rem;
-    font-weight: 100;
+    font-size: 5rem;
+    font-weight: 400;
     text-transform: uppercase;
     letter-spacing: -0.05rem;
     font-family: var(--font-principal);
@@ -1125,7 +1125,7 @@ h2 {
    FOOTER
    ============================================ */
 .titulo-footer h2 {
-    font-size: 5rem;
+    font-size: 3rem;
     font-weight: 500;
     letter-spacing: .4rem;
     background-image: url('../img/fondo-negro.png');
@@ -1284,7 +1284,7 @@ footer {
     }
 
     section {
-        padding: 3rem 0;
+        padding: 1rem 0;
     }
 
     .banner-imagenes {
@@ -1300,7 +1300,7 @@ footer {
     }
 
     .titulo-footer h2 {
-        font-size: 10rem;
+        font-size: 6rem;
     }
 
     /* ============================================
