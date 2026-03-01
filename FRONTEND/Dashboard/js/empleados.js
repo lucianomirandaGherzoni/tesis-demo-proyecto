@@ -1,5 +1,5 @@
 import { estado } from "./estado.js"
-import { showNotification } from "./utilidades.js"
+import { showNotification, confirmarAccion } from "./utilidades.js"
 import { fetchProfesionales, createOrUpdateEmpleado, deleteEmpleado } from "./api.js"
 
 let empleadosFiltrados = []
@@ -164,7 +164,12 @@ export async function guardarEmpleado(e) {
 }
 
 export async function eliminarEmpleadoConfirm(empleadoId) {
-  if (!confirm("¿Estás seguro de que deseas eliminar este empleado?")) return
+  const ok = await confirmarAccion(
+    '¿Estás seguro de que deseas eliminar este empleado? Esta acción no se puede deshacer.',
+    'Eliminar empleado',
+    'Sí, eliminar'
+  )
+  if (!ok) return
 
   const resultado = await deleteEmpleado(empleadoId)
   if (resultado) {

@@ -1,5 +1,5 @@
 import { estado } from "./estado.js"
-import { showNotification, formatCurrency } from "./utilidades.js"
+import { showNotification, formatCurrency, confirmarAccion } from "./utilidades.js"
 import { fetchServicios, createOrUpdateServicio, deleteServicio } from "./api.js"
 
 let serviciosFiltrados = []
@@ -144,7 +144,12 @@ export async function guardarServicio(e) {
 }
 
 export async function eliminarServicioConfirm(servicioId) {
-  if (!confirm("¿Estás seguro de que deseas eliminar este servicio?")) return
+  const ok = await confirmarAccion(
+    '¿Estás seguro de que deseas eliminar este servicio? Esta acción no se puede deshacer.',
+    'Eliminar servicio',
+    'Sí, eliminar'
+  )
+  if (!ok) return
 
   const resultado = await deleteServicio(servicioId)
   if (resultado) {

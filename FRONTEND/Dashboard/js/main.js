@@ -1,6 +1,7 @@
 // 1. Importar Estado y Utilidades
 import { estado } from './estado.js';
 import { formatearFechaParaAPI, showNotification } from './utilidades.js';
+import { inicializarAuth } from './auth.js';
 
 // 2. Importar Servicios API
 import * as api from './api.js';
@@ -23,11 +24,15 @@ const formularioCita = document.getElementById("appointment-form"); // Legacy
 import { inicializarClientes } from './clientes.js';
 import { inicializarServicios } from './servicios.js';
 import { inicializarEmpleados } from './empleados.js';
+import { inicializarUsuarios } from './usuarios.js';
 // ===================================================
 // INICIALIZACIÓN
 // ===================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Auth siempre primero — muestra el login o restaura la sesión
+  inicializarAuth();
+
   estado.isLoading = true;
 
   try {
@@ -201,6 +206,7 @@ function setupPrincipalEventListeners() {
   inicializarClientes();
   inicializarServicios();
   inicializarEmpleados();
+  inicializarUsuarios();
 }
 
 // ===================================================
