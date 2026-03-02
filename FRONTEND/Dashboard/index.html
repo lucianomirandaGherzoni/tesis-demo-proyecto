@@ -7,7 +7,7 @@
     <title>ELEVÉ - Gestión de Peluquería</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -342,11 +342,11 @@
 
                     <div class="tarjeta-grafico">
                         <div class="encabezado-grafico">
-                            <i class="fas fa-hand-holding-usd"></i>
-                            <h4>Ingresos por Empleado</h4>
+                            <i class="fas fa-chart-pie"></i>
+                            <h4>Ocupación por Empleado</h4>
                         </div>
                         <div class="contenedor-grafico">
-                            <div class="grafico-barras" id="grafico-ingresos-empleado"></div>
+                            <div class="grafico-ocupacion" id="grafico-ocupacion-empleado"></div>
                         </div>
                     </div>
 
@@ -721,6 +721,15 @@
                         <label for="servicio-duracion">Duración (minutos)</label>
                         <input type="number" id="servicio-duracion" placeholder="30" min="5" step="5" required>
                     </div>
+                    <div class="grupo-formulario">
+                        <div class="label-pros-header">
+                            <label>Profesionales asignados</label>
+                            <span id="contador-pros-servicio" class="pill-contador-pros vacio">0 seleccionados</span>
+                        </div>
+                        <div id="selector-profesionales-servicio" class="selector-profesionales">
+                            <p class="sin-pros-mensaje"><i class="fas fa-spinner fa-spin"></i> Cargando...</p>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="pie-modal">
@@ -757,6 +766,13 @@
                     <div class="grupo-formulario">
                         <label for="empleado-especialidad">Especialidad</label>
                         <input type="text" id="empleado-especialidad" placeholder="Ej: Barbero, Estilista">
+                    </div>
+                    <div class="grupo-formulario">
+                        <div class="label-horario-header">
+                            <label>Horario laboral</label>
+                            <span id="pill-horario-empleado" class="pill-contador-pros vacio">Sin configurar</span>
+                        </div>
+                        <div class="horario-semanal" id="horario-semanal-empleado"></div>
                     </div>
                 </form>
             </div>
@@ -821,14 +837,19 @@
     <!-- Modal de Confirmación global -->
     <div id="modal-confirmar" class="modal modal-confirmar-overlay">
         <div class="confirmar-card">
-            <div class="confirmar-icono-wrap">
-                <i class="fas fa-exclamation-triangle"></i>
+            <div class="confirmar-header">
+                <button id="confirmar-cerrar" class="confirmar-btn-cerrar" aria-label="Cerrar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
             </div>
             <h3 id="confirmar-titulo" class="confirmar-titulo">¿Confirmar acción?</h3>
             <p  id="confirmar-mensaje" class="confirmar-mensaje"></p>
             <div class="confirmar-acciones">
-                <button id="confirmar-cancelar" class="boton-secundario">Cancelar</button>
-                <button id="confirmar-ok"       class="boton-primario confirmar-btn-ok">Confirmar</button>
+                <button id="confirmar-cancelar" class="confirmar-btn-cancel">Cancelar</button>
+                <button id="confirmar-ok" class="confirmar-btn-ok">Confirmar</button>
             </div>
         </div>
     </div>

@@ -44,8 +44,9 @@ html { scroll-behavior: smooth; }
   --c-comp-fondo:     #f0fdf4;
   --c-comp-borde:     #bbf7d0;
 
-  --font-display:     "Space Mono", monospace;
-  --font-body:        "Roboto Mono", monospace;
+  --font-display:     "Geist Mono", monospace;
+  --font-body:        "Geist Mono", monospace;
+  --font-numeric:     "Geist Mono", monospace;
 
   --sombra-xs: 0 1px 3px rgba(0,0,0,0.06);
   --sombra-sm: 0 2px 8px rgba(0,0,0,0.06);
@@ -134,8 +135,11 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0 auto;
 }
 
-.seccion-logo { display: flex; align-items: center; gap: 1rem; }
-
+.seccion-logo { display: flex; align-items: center; gap: 1rem; 
+}
+.seccion-logo img{
+  max-width: 100px;
+}
 .contenedor-principal {
   display: flex;
   max-width: 1600px;
@@ -405,6 +409,388 @@ textarea.form-input, .grupo-formulario textarea { min-height: 80px; resize: vert
   padding: 1.25rem 1.5rem;
   border-top: 1px solid var(--c-borde-suave);
   background: var(--c-gris-claro);
+}
+
+/* ===================================================
+   SELECTOR DE PROFESIONALES — Modal Servicios
+   =================================================== */
+
+/* Encabezado de la sección */
+.label-pros-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.label-pros-header label {
+  margin-bottom: 0 !important;
+}
+
+.pill-contador-pros {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.65rem;
+  border-radius: 99px;
+  background: var(--c-primario);
+  color: white;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.pill-contador-pros.vacio {
+  background: var(--c-gris-claro);
+  color: var(--c-secundario);
+  border: 1px solid var(--c-borde);
+}
+
+/* Caja contenedora del grid */
+.selector-profesionales {
+  border: 1px solid var(--c-borde);
+  border-radius: var(--r-md);
+  background: var(--c-gris-claro);
+  padding: 0.75rem;
+  max-height: 230px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 0.5rem;
+}
+
+/* Chip base */
+.chip-profesional {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.7rem 0.55rem 0.6rem;
+  border: 1.5px solid var(--c-borde);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  background: var(--c-superficie);
+  transition: border-color 0.16s, background 0.16s, box-shadow 0.16s, transform 0.12s;
+  user-select: none;
+  position: relative;
+  box-shadow: var(--sombra-xs);
+  overflow: hidden;
+}
+
+/* Línea lateral de color del profesional */
+.chip-profesional::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--chip-color, var(--c-borde));
+  border-radius: 4px 0 0 4px;
+  opacity: 0;
+  transition: opacity 0.16s;
+}
+
+.chip-profesional:hover {
+  border-color: #9ca3af;
+  background: white;
+  box-shadow: var(--sombra-sm);
+  transform: translateY(-1px);
+}
+
+.chip-profesional:hover::before { opacity: 0.5; }
+
+.chip-profesional.seleccionado {
+  border-color: var(--c-primario);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(26,26,26,0.07), var(--sombra-xs);
+}
+
+.chip-profesional.seleccionado::before { opacity: 1; }
+
+/* Avatar */
+.avatar-chip { display: none; }
+
+/* Nombre */
+.nombre-chip {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--c-primario);
+  font-family: var(--font-display);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  letter-spacing: -0.01em;
+}
+
+/* Checkbox cuadrado — reemplaza el fa-check circle */
+.chip-check-box {
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  border: 1.5px solid var(--c-borde);
+  background: transparent;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: border-color 0.16s, background 0.16s;
+  position: relative;
+}
+
+/* Tilde SVG inline via ::after */
+.chip-check-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  transition: background 0.16s;
+}
+
+.chip-profesional.seleccionado .chip-check-box {
+  border-color: var(--c-primario);
+  background: var(--c-primario);
+  /* Checkmark via clip-path */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 10 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4l2.5 2.5L9 1' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 9px 7px;
+}
+
+/* Ocultar el ícono fa antiguo si quedara */
+.chip-check-icon { display: none; }
+
+/* Estado vacío */
+.sin-pros-mensaje {
+  font-size: 0.825rem;
+  color: var(--c-secundario);
+  padding: 1.25rem 0.5rem;
+  grid-column: 1 / -1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.sin-pros-mensaje i {
+  font-size: 1.25rem;
+  color: var(--c-terciario);
+}
+
+/* ─── Badges en la lista de servicios ─── */
+.pros-asignados-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.badge-pro-servicio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.3rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.01em;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+.badge-pro-servicio .mini-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.label-sin-pros {
+  font-size: 0.7rem;
+  color: var(--c-terciario);
+  font-style: italic;
+}
+
+/* ===================================================
+   HORARIO LABORAL — Modal Empleados
+   =================================================== */
+
+.label-horario-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.label-horario-header label {
+  margin-bottom: 0 !important;
+}
+
+/* Toggle switch puro CSS */
+.toggle-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.toggle-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-track {
+  width: 34px;
+  height: 19px;
+  background: var(--c-borde);
+  border-radius: 99px;
+  position: relative;
+  display: block;
+  transition: background 0.2s;
+}
+
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.2s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.toggle-switch input:checked + .toggle-track {
+  background: var(--c-primario);
+}
+
+.toggle-switch input:checked + .toggle-track::after {
+  transform: translateX(15px);
+}
+
+/* Contenedor general */
+.horario-semanal {
+  border: 1px solid var(--c-borde);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+/* Fila de día */
+.dia-fila {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.875rem;
+  border-bottom: 1px solid var(--c-borde-suave);
+  background: var(--c-superficie);
+  transition: background 0.15s;
+}
+
+.dia-fila:last-child { border-bottom: none; }
+.dia-fila.dia-activo { background: var(--c-gris-claro); }
+
+/* Etiqueta del día */
+.dia-etiqueta {
+  font-family: var(--font-display);
+  font-size: 0.775rem;
+  font-weight: 700;
+  width: 82px;
+  flex-shrink: 0;
+  color: var(--c-terciario);
+  letter-spacing: -0.01em;
+  transition: color 0.15s;
+}
+
+.dia-fila.dia-activo .dia-etiqueta {
+  color: var(--c-primario);
+}
+
+/* Rango de horas — aparece al activar el día */
+.rango-horas {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+
+.dia-fila.dia-activo .rango-horas {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Select inline de hora — override del grupo-formulario */
+.input-hora {
+  flex: 1;
+  min-width: 0 !important;
+  width: auto !important;
+  padding: 0.3rem 0.4rem !important;
+  font-size: 0.76rem !important;
+  font-family: var(--font-display) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  border-radius: var(--r-sm) !important;
+  height: auto !important;
+  cursor: text;
+  text-align: center;
+}
+
+.sep-horas {
+  font-size: 0.7rem;
+  color: var(--c-terciario);
+  flex-shrink: 0;
+  font-family: var(--font-display);
+}
+
+/* Badge de resumen de horario en la lista de empleados */
+.resumen-horario-empleado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.3rem;
+}
+
+.badge-dia-activo {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: var(--c-primario);
+  color: white;
+  letter-spacing: 0.02em;
+}
+
+.badge-dia-activo.fin-semana {
+  background: var(--c-gris-claro);
+  color: var(--c-secundario);
+  border: 1px solid var(--c-borde);
+}
+
+.texto-horas-resumen {
+  font-size: 0.7rem;
+  color: var(--c-terciario);
+  font-family: var(--font-display);
+  font-weight: 700;
+  white-space: nowrap;
+  margin-left: 0.1rem;
 }
 
 /* ===================================================
@@ -771,7 +1157,7 @@ textarea.form-input, .grupo-formulario textarea { min-height: 80px; resize: vert
 }
 
 .cantidad-financiera, .contador-financiero {
-  font-family: var(--font-display);
+  font-family: var(--font-numeric);
   font-size: 2.75rem;
   font-weight: 700;
   color: white;
@@ -857,7 +1243,7 @@ textarea.form-input, .grupo-formulario textarea { min-height: 80px; resize: vert
 .tendencia-metrica.neutral  { background: var(--c-gris-claro); color: var(--c-secundario); }
 
 .valor-metrica {
-  font-family: var(--font-display);
+  font-family: var(--font-numeric);
   font-size: 2rem; font-weight: 700;
   color: var(--c-primario);
   line-height: 1;
@@ -935,57 +1321,203 @@ textarea.form-input, .grupo-formulario textarea { min-height: 80px; resize: vert
   min-height: 350px;
 }
 
+/* Gráficos de barras horizontales - Empleados */
 .grafico-barras {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  height: 260px;
+  flex-direction: column;
+  gap: 1rem;
   width: 100%;
-  gap: 0.5rem;
-  padding: 0.5rem 0 0;
+  padding: 0.5rem 0;
 }
 
-#grafico-servicios-empleado, #grafico-ingresos-empleado { height: 300px; }
+#grafico-servicios-empleado, #grafico-ingresos-empleado { 
+  height: auto;
+  min-height: 280px;
+}
 
 .barra-item {
-  flex: 1;
-  display: flex; flex-direction: column;
-  align-items: center; gap: 0.5rem;
-  max-width: 56px;
-  height: 100%;
-  justify-content: flex-end;
-}
-
-.barra {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   width: 100%;
-  background: var(--c-primario);
-  border-radius: 6px 6px 2px 2px;
-  position: relative;
-  transition: all 0.3s var(--ease);
-  min-height: 4px;
 }
 
-.barra:hover { background: var(--c-negro); transform: translateY(-3px); box-shadow: 0 -4px 16px rgba(0,0,0,0.18); }
-
-.barra-valor {
-  position: absolute;
-  top: 8px; left: 50%;
-  transform: translateX(-50%);
+.barra-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--c-primario) 0%, #404040 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-display);
-  font-size: 0.6875rem; font-weight: 700;
+  font-size: 0.875rem;
+  font-weight: 700;
   color: white;
-  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  position: relative;
+}
+
+.barra-ranking {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--c-fondo);
+  border: 2px solid var(--c-fondo);
+  font-size: 0.5625rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-primario);
+}
+
+.barra-ranking.top-1 { background: linear-gradient(135deg, #FFD700, #FFA500); color: #1a1a1a; }
+.barra-ranking.top-2 { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); color: #1a1a1a; }
+.barra-ranking.top-3 { background: linear-gradient(135deg, #CD7F32, #A0522D); color: white; }
+
+.barra-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.barra-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .barra-etiqueta {
-  font-size: 0.625rem;
-  color: var(--c-secundario);
-  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--c-primario);
   font-weight: 600;
   font-family: var(--font-display);
   white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
-  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barra-valor {
+  font-family: var(--font-numeric);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--c-primario);
+  white-space: nowrap;
+}
+
+.barra-track {
+  width: 100%;
+  height: 8px;
+  background: var(--c-borde);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.barra {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-primario) 0%, #4a4a4a 100%);
+  border-radius: 100px;
+  position: relative;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 4px;
+}
+
+.barra-item:hover .barra {
+  background: linear-gradient(90deg, #1a1a1a 0%, #606060 100%);
+  box-shadow: 0 0 12px rgba(0,0,0,0.2);
+}
+
+.barra-item:hover .barra-avatar {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.barra-avatar, .barra { transition: all 0.3s var(--ease); }
+
+/* Gráfico de Ocupación - Círculos de Progreso */
+.grafico-ocupacion {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+}
+
+.ocupacion-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  transition: transform 0.3s var(--ease);
+}
+
+.ocupacion-item:hover {
+  transform: translateY(-3px);
+}
+
+.ocupacion-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.ocupacion-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ocupacion-ring .ring-bg {
+  fill: none;
+  stroke: var(--c-borde);
+  stroke-width: 6;
+}
+
+.ocupacion-ring .ring-progress {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ring-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+.ring-value {
+  font-family: var(--font-numeric);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--c-primario);
+  line-height: 1;
+}
+
+.ring-percent {
+  font-family: var(--font-body);
+  font-size: 0.625rem;
+  font-weight: 600;
+  color: var(--c-secundario);
+}
+
+.ocupacion-nombre {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--c-primario);
+  text-align: center;
 }
 
 .grafico-dona {
@@ -1005,7 +1537,7 @@ textarea.form-input, .grupo-formulario textarea { min-height: 80px; resize: vert
 }
 
 .grafico-dona-valor {
-  font-family: var(--font-display);
+  font-family: var(--font-numeric);
   font-size: 1.75rem; font-weight: 700;
   color: var(--c-primario);
   line-height: 1;
@@ -1528,71 +2060,118 @@ textarea.form-input, .grupo-formulario textarea { min-height: 80px; resize: vert
    18. POPUP DE CONFIRMACIÓN
    =================================================== */
 .modal-confirmar-overlay {
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(6px);
-  z-index: 10001; /* por encima de cualquier otro modal */
+  background: rgba(15, 15, 15, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 10001;
 }
 
 @keyframes confirmarEnter {
-  from { opacity: 0; transform: scale(0.88) translateY(16px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0); }
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .confirmar-card {
   background: var(--c-superficie);
-  border-radius: var(--r-xl);
-  padding: 2.25rem 2rem 1.75rem;
+  border-radius: 20px;
+  padding: 0;
   width: 100%;
-  max-width: 400px;
-  box-shadow: var(--sombra-xl);
-  text-align: center;
-  animation: confirmarEnter 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  max-width: 380px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  animation: confirmarEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.confirmar-icono-wrap {
-  width: 52px; height: 52px;
-  background: #fef9ec;
-  border: 1px solid #fde68a;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 1.25rem;
-  font-size: 1.25rem;
-  color: #d97706;
+.confirmar-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1rem 0;
+}
+
+.confirmar-btn-cerrar {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--c-gris-claro);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.confirmar-btn-cerrar svg {
+  width: 16px;
+  height: 16px;
+  color: var(--c-secundario);
+}
+
+.confirmar-btn-cerrar:hover {
+  background: var(--c-borde);
+}
+
+.confirmar-btn-cerrar:hover svg {
+  color: var(--c-primario);
 }
 
 .confirmar-titulo {
   font-family: var(--font-display);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--c-primario);
   letter-spacing: -0.03em;
-  margin-bottom: 0.625rem;
+  margin: 1.25rem 1.75rem 0.5rem;
+  text-align: left;
 }
 
 .confirmar-mensaje {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: var(--c-secundario);
   line-height: 1.6;
-  margin-bottom: 1.75rem;
+  margin: 0 1.75rem 1.75rem;
+  text-align: left;
 }
 
 .confirmar-acciones {
   display: flex;
   gap: 0.75rem;
-  justify-content: center;
+  padding: 1.25rem 1.75rem 1.75rem;
+  background: var(--c-gris-claro);
+  border-top: 1px solid var(--c-borde);
 }
 
-.confirmar-acciones .boton-secundario,
-.confirmar-acciones .boton-primario {
+.confirmar-btn-cancel,
+.confirmar-btn-ok {
   flex: 1;
-  max-width: 160px;
-  justify-content: center;
+  padding: 0.875rem 1.25rem;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.confirmar-btn-cancel {
+  background: var(--c-superficie);
+  color: var(--c-primario);
+  border: 1px solid var(--c-borde);
+}
+
+.confirmar-btn-cancel:hover {
+  background: var(--c-borde);
+  border-color: #d1d5db;
 }
 
 .confirmar-btn-ok {
-  background: var(--c-error);
+  background: var(--c-primario);
+  color: white;
 }
 
 .confirmar-btn-ok:hover {
-  background: #b91c1c;
+  background: var(--c-negro);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }

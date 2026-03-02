@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Manrope:wght@200..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&display=swap');
 
 :root {
     --clr-oscuro: black;
     --clr-blanco: white;
-    --font-principal: 'Manrope', sans-serif;
+    --font-principal: 'Geist Mono', monospace;
     --font-mono: 'Geist Mono', monospace;
 }
 
@@ -601,60 +601,29 @@ h2 {
     gap: 2rem;
 }
 
+#servicios {
+    background: var(--clr-oscuro);
+    color: var(--clr-blanco);
+}
+
+#servicios h2 {
+    color: var(--clr-blanco);
+}
+
 .service-item {
     text-align: center;
     padding: .5rem;
-}
-
-.service-icon {
-    width: 64px;
-    height: 64px;
-    background: #f5f5f5;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-}
-
-.service-icon svg {
-    width: 32px;
-    height: 32px;
 }
 
 .service-item h3 {
     font-size: 1.25rem;
     font-weight: 500;
     margin-bottom: 0.5rem;
+    color: var(--clr-blanco);
 }
 
 .service-item p {
-    color: #666;
-}
-
-.service-item a {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: var(--clr-oscuro);
-    gap: .2rem;
-    margin-top: 1rem;
-    font-weight: 200;
-}
-
-.service-item a svg {
-    opacity: 0;
-}
-
-.service-item a p {
-    font-size: .8rem;
-    color: var(--clr-oscuro);
-    text-transform: uppercase;
-}
-
-.service-item a:hover svg {
-    opacity: 1;
-    transition: all 1s;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 /* About */

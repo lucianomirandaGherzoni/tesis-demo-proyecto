@@ -77,6 +77,23 @@ const datosSimulados = {
             { nombre: 'Sofía', monto: 3100 }
         ]
     },
+    // Ocupación por Empleado (%)
+    ocupacionPorEmpleado: {
+        week: [
+            { nombre: 'Ana', porcentaje: 92 },
+            { nombre: 'Carlos', porcentaje: 87 },
+            { nombre: 'Lucía', porcentaje: 78 },
+            { nombre: 'Marcos', porcentaje: 72 },
+            { nombre: 'Sofía', porcentaje: 65 }
+        ],
+        month: [
+            { nombre: 'Ana', porcentaje: 88 },
+            { nombre: 'Carlos', porcentaje: 82 },
+            { nombre: 'Lucía', porcentaje: 75 },
+            { nombre: 'Marcos', porcentaje: 70 },
+            { nombre: 'Sofía', porcentaje: 58 }
+        ]
+    },
     // Turnos por Hora
     turnosPorHora: {
         week: [
@@ -120,7 +137,7 @@ export function renderFinancialData(period) {
 
     // 3. Renderizar gráficos que dependen del filtro
     renderizarGraficoServiciosEmpleado(period);
-    renderizarGraficoIngresosEmpleado(period); 
+    renderizarGraficoOcupacionEmpleado(period); 
     renderizarGraficoTurnosPorHora_Linea(period); 
     renderizarGraficoFidelidad(period);
     renderizarGraficoEstadoTurnos(period);
@@ -171,42 +188,69 @@ function renderizarGraficoServiciosEmpleado(period) {
     const container = document.getElementById('grafico-servicios-empleado');
     if (!container) return;
 
-    // Lee desde las claves 'week' o 'month'
     const empleadosData = datosSimulados.serviciosPorEmpleado[period];
     const maxCount = Math.max(...empleadosData.map(e => e.cantidad));
 
-    container.innerHTML = empleadosData.map(empleado => {
-        const altura = (empleado.cantidad / maxCount) * 100;
+    container.innerHTML = empleadosData.map((empleado, index) => {
+        const porcentaje = (empleado.cantidad / maxCount) * 100;
+        const iniciales = empleado.nombre.charAt(0).toUpperCase();
+        const rankClass = index < 3 ? `top-${index + 1}` : '';
+        
         return `
           <div class="barra-item">
-            <div class="barra" style="height: ${altura > 0 ? altura : 5}%">
-              <span class="barra-valor">${empleado.cantidad}</span>
+            <div class="barra-avatar">
+              ${iniciales}
+              <span class="barra-ranking ${rankClass}">${index + 1}</span>
             </div>
-            <span class="barra-etiqueta" title="${empleado.nombre}">${empleado.nombre}</span>
+            <div class="barra-info">
+              <div class="barra-top-row">
+                <span class="barra-etiqueta">${empleado.nombre}</span>
+                <span class="barra-valor">${empleado.cantidad} servicios</span>
+              </div>
+              <div class="barra-track">
+                <div class="barra" style="width: ${porcentaje}%"></div>
+              </div>
+            </div>
           </div>
         `;
     }).join('');
 }
 
 /**
- * Renderiza el gráfico de barras de Ingresos por Empleado.
+ * Renderiza el gráfico de Ocupación por Empleado con círculos de progreso.
  */
-function renderizarGraficoIngresosEmpleado(period) {
-    const container = document.getElementById('grafico-ingresos-empleado');
+function renderizarGraficoOcupacionEmpleado(period) {
+    const container = document.getElementById('grafico-ocupacion-empleado');
     if (!container) return;
 
-    // Lee desde las claves 'week' o 'month'
-    const ingresosData = datosSimulados.ingresosPorEmpleado[period];
-    const maxMonto = Math.max(...ingresosData.map(e => e.monto));
+    const ocupacionData = datosSimulados.ocupacionPorEmpleado[period];
+    const circumference = 2 * Math.PI * 32; // Radio 32
 
-    container.innerHTML = ingresosData.map(empleado => {
-        const altura = (empleado.monto / maxMonto) * 100;
+    container.innerHTML = ocupacionData.map((empleado, index) => {
+        const offset = circumference - (empleado.porcentaje / 100) * circumference;
+        const iniciales = empleado.nombre.charAt(0).toUpperCase();
+        
+        // Color según rendimiento
+        let color = '#16a34a'; // Verde alto
+        if (empleado.porcentaje < 70) color = '#d97706'; // Naranja medio
+        if (empleado.porcentaje < 50) color = '#dc2626'; // Rojo bajo
+        
         return `
-          <div class="barra-item">
-            <div class="barra" style="height: ${altura > 0 ? altura : 5}%">
-              <span class="barra-valor">${formatCurrency(empleado.monto)}</span>
+          <div class="ocupacion-item">
+            <div class="ocupacion-ring">
+              <svg viewBox="0 0 80 80">
+                <circle class="ring-bg" cx="40" cy="40" r="32" />
+                <circle class="ring-progress" cx="40" cy="40" r="32" 
+                  stroke="${color}"
+                  stroke-dasharray="${circumference}" 
+                  stroke-dashoffset="${offset}" />
+              </svg>
+              <div class="ring-center">
+                <span class="ring-value">${empleado.porcentaje}</span>
+                <span class="ring-percent">%</span>
+              </div>
             </div>
-            <span class="barra-etiqueta" title="${empleado.nombre}">${empleado.nombre}</span>
+            <span class="ocupacion-nombre">${empleado.nombre}</span>
           </div>
         `;
     }).join('');

@@ -4,6 +4,63 @@ import { fetchProfesionales, createOrUpdateEmpleado, deleteEmpleado } from "./ap
 
 let empleadosFiltrados = []
 
+// ─── Horario laboral — LocalStorage ───────────────────────────────────────────────
+const LS_KEY_HORARIOS = 'eleve_empleado_horarios'
+
+const DIAS = [
+  { key: 'lunes',     label: 'Lunes',     finSemana: false },
+  { key: 'martes',    label: 'Martes',    finSemana: false },
+  { key: 'miercoles', label: 'Miércoles', finSemana: false },
+  { key: 'jueves',    label: 'Jueves',    finSemana: false },
+  { key: 'viernes',   label: 'Viernes',   finSemana: false },
+  { key: 'sabado',    label: 'Sábado',    finSemana: true  },
+  { key: 'domingo',   label: 'Domingo',   finSemana: true  },
+]
+
+const HORAS = Array.from({ length: 16 }, (_, i) =>
+  `${(i + 7).toString().padStart(2, '0')}:00`
+) // 07:00 → 22:00, solo horas enteras
+
+const HORARIO_DEFAULT = {
+  lunes:     { activo: true,  desde: '09:00', hasta: '18:00' },
+  martes:    { activo: true,  desde: '09:00', hasta: '18:00' },
+  miercoles: { activo: true,  desde: '09:00', hasta: '18:00' },
+  jueves:    { activo: true,  desde: '09:00', hasta: '18:00' },
+  viernes:   { activo: true,  desde: '09:00', hasta: '18:00' },
+  sabado:    { activo: true,  desde: '09:00', hasta: '14:00' },
+  domingo:   { activo: false, desde: '09:00', hasta: '14:00' },
+}
+
+function cargarHorariosLS() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY_HORARIOS) || '{}') }
+  catch { return {} }
+}
+
+function guardarHorariosLS(data) {
+  localStorage.setItem(LS_KEY_HORARIOS, JSON.stringify(data))
+}
+
+export function getHorarioEmpleado(empleadoId) {
+  return cargarHorariosLS()[empleadoId] || null
+}
+
+function setHorarioEmpleado(empleadoId, horario) {
+  const all = cargarHorariosLS()
+  all[empleadoId] = horario
+  guardarHorariosLS(all)
+}
+
+function formatearResumenHorario(horario) {
+  if (!horario) return null
+  return DIAS.filter(d => horario[d.key]?.activo)
+}
+
+function generarOpcionesHoras(selEl, valorActual) {
+  selEl.innerHTML = HORAS.map(h =>
+    `<option value="${h}" ${h === valorActual ? 'selected' : ''}>${h}</option>`
+  ).join('')
+}
+
 export async function inicializarEmpleados() {
   await cargarEmpleados()
   setupEmpleadosEventListeners()
@@ -70,6 +127,18 @@ function renderizarEmpleados() {
     const iniciales = obtenerIniciales(empleado.nombre)
     const estadoActivo = empleado.activo !== false
     const claseEstado = estadoActivo ? 'activo' : 'inactivo'
+    const horario = getHorarioEmpleado(empleado.id)
+    const diasActivos = formatearResumenHorario(horario)
+
+    let horarioHTML = ''
+    if (diasActivos && diasActivos.length > 0) {
+      const badges = diasActivos.map(d =>
+        `<span class="badge-dia-activo ${d.finSemana ? 'fin-semana' : ''}">${d.label.substring(0, 3)}</span>`
+      ).join('')
+      // Calcular rango de horas más frecuente
+      const primero = horario[diasActivos[0].key]
+      horarioHTML = `<div class="resumen-horario-empleado">${badges}<span class="texto-horas-resumen">${primero.desde}–${primero.hasta}</span></div>`
+    }
     
     return `
       <div class="elemento-lista">
@@ -80,6 +149,7 @@ function renderizarEmpleados() {
             <span class="indicador-estado ${claseEstado}" title="${estadoActivo ? 'Activo' : 'Inactivo'}"></span>
           </div>
           <p>${empleado.especialidad || 'Sin especialidad'}</p>
+          ${horarioHTML}
           <small>${empleado.telefono || 'Sin teléfono'}</small>
         </div>
         <div class="acciones-elemento">
@@ -128,6 +198,7 @@ export function abrirModalEmpleado(empleadoId = null) {
     document.getElementById("empleado-id").value = ""
   }
 
+  poblarHorarioEmpleado(empleadoId)
   modal.classList.add("activo")
   document.body.style.overflow = "hidden"
 }
@@ -136,6 +207,69 @@ export function cerrarModalEmpleado() {
   const modal = document.getElementById("modal-empleado")
   modal.classList.remove("activo")
   document.body.style.overflow = ""
+  const contenedor = document.getElementById('horario-semanal-empleado')
+  if (contenedor) contenedor.innerHTML = ''
+}
+
+function actualizarPillHorario() {
+  const pill = document.getElementById('pill-horario-empleado')
+  if (!pill) return
+  const activos = document.querySelectorAll('#horario-semanal-empleado .dia-fila.dia-activo').length
+  if (activos === 0) {
+    pill.textContent = 'Sin configurar'
+    pill.classList.add('vacio')
+  } else {
+    pill.textContent = `${activos} día${activos > 1 ? 's' : ''} activo${activos > 1 ? 's' : ''}`
+    pill.classList.remove('vacio')
+  }
+}
+
+function poblarHorarioEmpleado(empleadoId) {
+  const contenedor = document.getElementById('horario-semanal-empleado')
+  if (!contenedor) return
+
+  const horarioGuardado = empleadoId ? getHorarioEmpleado(empleadoId) : null
+  const horario = horarioGuardado || HORARIO_DEFAULT
+
+  contenedor.innerHTML = DIAS.map(dia => {
+    const cfg = horario[dia.key] || { activo: false, desde: '09:00', hasta: '18:00' }
+    return `
+      <div class="dia-fila ${cfg.activo ? 'dia-activo' : ''}" data-dia="${dia.key}">
+        <span class="dia-etiqueta">${dia.label}</span>
+        <div class="rango-horas">
+          <input type="time" class="input-hora sel-desde" value="${cfg.desde}">
+          <span class="sep-horas">→</span>
+          <input type="time" class="input-hora sel-hasta" value="${cfg.hasta}">
+        </div>
+        <label class="toggle-switch" title="${cfg.activo ? 'Desactivar' : 'Activar'} día">
+          <input type="checkbox" class="toggle-dia" data-dia="${dia.key}" ${cfg.activo ? 'checked' : ''}>
+          <span class="toggle-track"></span>
+        </label>
+      </div>`
+  }).join('')
+
+  // Event listeners: toggle
+  contenedor.querySelectorAll('.toggle-dia').forEach(toggle => {
+    toggle.addEventListener('change', () => {
+      const fila = toggle.closest('.dia-fila')
+      fila.classList.toggle('dia-activo', toggle.checked)
+      actualizarPillHorario()
+    })
+  })
+
+  actualizarPillHorario()
+}
+
+function obtenerHorarioActual() {
+  const horario = {}
+  document.querySelectorAll('#horario-semanal-empleado .dia-fila').forEach(fila => {
+    const key = fila.dataset.dia
+    const activo = fila.classList.contains('dia-activo')
+    const desde = fila.querySelector('.sel-desde')?.value || '09:00'
+    const hasta = fila.querySelector('.sel-hasta')?.value || '18:00'
+    horario[key] = { activo, desde, hasta }
+  })
+  return horario
 }
 
 export async function guardarEmpleado(e) {
@@ -151,6 +285,10 @@ export async function guardarEmpleado(e) {
 
   const resultado = await createOrUpdateEmpleado(empleadoData)
   if (resultado) {
+    const idFinal = resultado.id || resultado.empleado?.id || empleadoData.id
+    if (idFinal) {
+      setHorarioEmpleado(idFinal, obtenerHorarioActual())
+    }
     showNotification(
       empleadoData.id ? "Empleado actualizado correctamente" : "Empleado creado correctamente",
       "success",

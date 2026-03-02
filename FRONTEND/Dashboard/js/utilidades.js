@@ -156,6 +156,7 @@ export function confirmarAccion(
     const mensajeEl = document.getElementById('confirmar-mensaje')
     const btnOk     = document.getElementById('confirmar-ok')
     const btnCancel = document.getElementById('confirmar-cancelar')
+    const btnCerrar = document.getElementById('confirmar-cerrar')
 
     // Fallback por si el HTML no tiene el modal todavía
     if (!modal) { resolve(window.confirm(mensaje)); return }
@@ -172,6 +173,7 @@ export function confirmarAccion(
       document.body.style.overflow = ''
       btnOk.removeEventListener('click', onOk)
       btnCancel.removeEventListener('click', onCancel)
+      if (btnCerrar) btnCerrar.removeEventListener('click', onCancel)
       modal.removeEventListener('click', onFondo)
       document.removeEventListener('keydown', onKey)
       resolve(resultado)
@@ -184,6 +186,7 @@ export function confirmarAccion(
 
     btnOk.addEventListener('click',     onOk)
     btnCancel.addEventListener('click', onCancel)
+    if (btnCerrar) btnCerrar.addEventListener('click', onCancel)
     modal.addEventListener('click',     onFondo)
     document.addEventListener('keydown', onKey)
   })
