@@ -1,6 +1,6 @@
 import { estado } from "./estado.js"
-import { showNotification, formatCurrency, confirmarAccion } from "./utilidades.js"
-import { fetchServicios, createOrUpdateServicio, deleteServicio, fetchProfesionales } from "./api.js"
+import { showNotification, formatCurrency, confirmarAccion, setBtnLoading } from "./utilidades.js"
+import { dbGetServicios, dbSaveServicio, dbDeleteServicio } from "./db.js"
 
 let serviciosFiltrados = []
 
@@ -50,7 +50,7 @@ export async function inicializarServicios() {
 
 async function cargarServicios() {
   try {
-    estado.servicios = await fetchServicios()
+    estado.servicios = dbGetServicios()
     serviciosFiltrados = [...estado.servicios]
     actualizarMetricasServicios()
   } catch (error) {
@@ -225,6 +225,10 @@ export function cerrarModalServicio() {
 export async function guardarServicio(e) {
   e.preventDefault()
 
+  const btn = e.target.closest('form')?.querySelector('[type="submit"]') ||
+               document.querySelector('#modal-servicio [type="submit"]')
+  const restaurar = setBtnLoading(btn)
+
   const servicioData = {
     id: document.getElementById("servicio-id").value || null,
     nombre: document.getElementById("servicio-nombre").value.trim(),
@@ -236,10 +240,11 @@ export async function guardarServicio(e) {
   // Capturar profesionales seleccionados antes de cerrar el modal
   const idsSeleccionados = obtenerIdsSeleccionados()
 
-  const resultado = await createOrUpdateServicio(servicioData)
+  const resultado = dbSaveServicio(servicioData)
+  restaurar()
   if (resultado) {
-    // Usar el id devuelto por el backend si es creación, o el existente si es edición
-    const idFinal = resultado.id || resultado.servicio?.id || servicioData.id
+    // Usar el id devuelto por el storage si es creación, o el existente si es edición
+    const idFinal = resultado.id || servicioData.id
     if (idFinal) {
       setProfesionalesDeServicio(idFinal, idsSeleccionados)
     }
@@ -264,7 +269,7 @@ export async function eliminarServicioConfirm(servicioId) {
   )
   if (!ok) return
 
-  const resultado = await deleteServicio(servicioId)
+  const resultado = dbDeleteServicio(servicioId)
   if (resultado) {
     showNotification("Servicio eliminado correctamente", "success")
     await cargarServicios()

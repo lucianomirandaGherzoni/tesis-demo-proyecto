@@ -2,6 +2,7 @@
 import { estado } from './estado.js';
 import { formatearFechaParaAPI, showNotification } from './utilidades.js';
 import { inicializarAuth } from './auth.js';
+import { sembrarDB, dbGetEmpleados, dbGetServicios } from './db.js';
 
 // 2. Importar Servicios API
 import * as api from './api.js';
@@ -30,23 +31,32 @@ import { inicializarUsuarios } from './usuarios.js';
 // ===================================================
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Sembrar BD de usuarios desde JSON antes de mostrar el login
+  await inicializarUsuarios();
+
+  // Sembrar BD de clientes, servicios y empleados
+  await sembrarDB();
+
   // Auth siempre primero — muestra el login o restaura la sesión
   inicializarAuth();
 
   estado.isLoading = true;
 
+  // Cargar profesionales y servicios desde la BD local (ya sembrada arriba)
+  estado.profesionales = dbGetEmpleados();
+  estado.servicios = dbGetServicios();
+  if (estado.profesionales.length > 0) {
+    estado.profesionalSeleccionado = 'pendiente';
+  }
+
   try {
-    // Carga de datos iniciales en paralelo
-    const [profesionales, servicios, dashboardStats, financialData] = await Promise.all([
-      api.fetchProfesionales(),
-      api.fetchServicios(),
+    // Carga de stats y finanzas (pueden fallar en modo demo)
+    const [dashboardStats, financialData] = await Promise.all([
       api.fetchDashboardStats(estado.fechaActual),
       api.fetchFinancialData('week')
     ]);
 
     // Mutamos el estado global con los datos cargados
-    estado.profesionales = profesionales;
-    estado.servicios = servicios;
     estado.dashboardStats = dashboardStats;
     estado.financialData = financialData;
 
@@ -134,22 +144,31 @@ function setupPrincipalEventListeners() {
   }
 
 
-  // Selector de período (Finanzas)
-  if (selectorPeriodo) { // <-- COMPROBACIÓN AÑADIDA
-    // Renderizado inicial de finanzas
-    renderFinancialData(selectorPeriodo.value);
+  // Selector de período (Finanzas) — botones
+  const grupoPeriodo = document.getElementById('period-selector')
+  if (grupoPeriodo) {
+    const btnsPeriodo = grupoPeriodo.querySelectorAll('.btn-periodo')
+    const periodoActivo = () => grupoPeriodo.querySelector('.btn-periodo.activo')?.dataset.periodo || 'week'
 
-    selectorPeriodo.addEventListener("change", async function () {
-      estado.isLoading = true;
-      try {
-        estado.financialData = await api.fetchFinancialData(this.value);
-      } catch (error) {
-        console.error('Error al cambiar período financiero', error);
-      } finally {
-        estado.isLoading = false;
-        renderFinancialData(this.value);
-      }
-    });
+    // Renderizado inicial
+    renderFinancialData(periodoActivo())
+
+    btnsPeriodo.forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        btnsPeriodo.forEach((b) => b.classList.remove('activo'))
+        btn.classList.add('activo')
+        const periodo = btn.dataset.periodo
+        estado.isLoading = true
+        try {
+          estado.financialData = await api.fetchFinancialData(periodo)
+        } catch (error) {
+          console.error('Error al cambiar período financiero', error)
+        } finally {
+          estado.isLoading = false
+          renderFinancialData(periodo)
+        }
+      })
+    })
   }
 
   // --- Listeners del Modal "Nuevo Turno" (legacy) ---
@@ -206,7 +225,7 @@ function setupPrincipalEventListeners() {
   inicializarClientes();
   inicializarServicios();
   inicializarEmpleados();
-  inicializarUsuarios();
+  // inicializarUsuarios ya fue llamado al inicio del DOMContentLoaded
 }
 
 // ===================================================

@@ -19,7 +19,8 @@ import {
   esHoy,
   puedeDiaAnterior,
   showNotification,
-  formatearFechaParaAPI
+  formatearFechaParaAPI,
+  setBtnLoading
 } from './utilidades.js';
 
 
@@ -39,7 +40,7 @@ let _recargarDashboardStats = () => console.warn('recargarDashboardStats no inye
   };
 } */
 
-function obtenerEstiloTurno(horaInicio, horaFin) {
+function obtenerEstiloTurno(horaInicio, horaFin, alturaSlot = 150) {
   // Descomponemos ambas horas (ej: "09:30")
   const [horaI, minI] = (horaInicio || "09:00").split(":").map(Number);
   const [horaF, minF] = (horaFin || "10:00").split(":").map(Number);
@@ -50,10 +51,9 @@ function obtenerEstiloTurno(horaInicio, horaFin) {
   // Duración real en minutos
   const duracionMinutos = (horaF * 60 + minF) - (horaI * 60 + minI);
 
-  // Cada hora equivale a 150px → 1 min = 150/60 = 2.5px
   return {
-    top: `${(minutosInicio / 60) * 150}px`,
-    height: `${(duracionMinutos / 60) * 150 - 6}px`
+    top: `${(minutosInicio / 60) * alturaSlot}px`,
+    height: `${Math.max((duracionMinutos / 60) * alturaSlot - 2, 20)}px`
   };
 } 
 
@@ -96,18 +96,6 @@ function renderizarNavegacion() {
   const navPestanas = document.getElementById("navPestanas");
   const turnosPendientes = estado.turnosPendientesCount;
 
-  // --- INICIO DE LA MODIFICACIÓN ---
-  // 1. Copia el mismo colorMap que usas en renderizarGrilla
-  const colorMap = {
-      "Bautista": "#3b82f6", // Azul
-      "Ciro": "#16a34a",     // Verde
-      "Felipe": "#f97316",   // Naranja
-      "Ricardo": "#a855f7",  // Violeta
-      "default": "#525252"  // Gris (por si acaso)
-  };
-  // --- FIN DE LA MODIFICACIÓN ---
-
-
   let html = `
     <button class="pestana-navegacion pendiente ${estado.profesionalSeleccionado === "pendiente" ? "activo" : ""}" data-id="pendiente">
       <svg class="icono" style="color: var(--color-primario);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,17 +109,13 @@ function renderizarNavegacion() {
   `;
 
   estado.profesionales.forEach((prof) => {
-    // --- INICIO DE LA MODIFICACIÓN ---
-    // 2. Usa el colorMap para buscar el color.
-    const color = colorMap[prof.nombre] || prof.color || '#ccc';
-    // --- FIN DE LA MODIFICACIÓN ---
+    const color = prof.color || '#525252';
+    const primerNombre = prof.nombre.split(' ')[0];
 
     html += `
       <button class="pestana-navegacion ${String(estado.profesionalSeleccionado) === String(prof.id) ? "activo" : ""}" data-id="${prof.id}">
-        
         <div class="punto-color" style="background-color: ${color};"></div>
-        
-        ${prof.nombre}
+        <span class="nombre-prof-tab">${primerNombre}</span>
       </button>
     `;
   });
@@ -243,21 +227,15 @@ function renderizarGrilla() {
   }
 
   const turnosConPosicion = detectarSuperposiciones(turnosFiltrados);
-  
-  // (Esto es una simulación. Idealmente, los colores vendrían de la API)
-  const colorMap = {
-      "Bautista": "#3b82f6", // Azul
-      "Ciro": "#16a34a",     // Verde
-      "Felipe": "#f97316",   // Naranja
-      "Ricardo": "#a855f7",  // Violeta
-      "default": "#525252"  // Gris
-  };
-  // --- FIN DE MODIFICACIÓN 1 ---
+
+  const alturaSlot = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--altura-slot').trim()
+  ) || 150;
 
   turnosConPosicion.forEach((turno) => {
     // --- INICIO DE MODIFICACIÓN 2: Lógica de color ---
     const profesional = estado.profesionales.find(p => p.nombre === turno.nombre_empleado);
-    const estilo = obtenerEstiloTurno(turno.hora, turno.hora_fin);
+    const estilo = obtenerEstiloTurno(turno.hora, turno.hora_fin, alturaSlot);
     const tarjeta = document.createElement("div");
     tarjeta.className = "tarjeta-turno";
     tarjeta.style.top = estilo.top;
@@ -272,7 +250,7 @@ function renderizarGrilla() {
     const duracion = calcularDuracionEnMinutos(turno.fecha, turno.hora, turno.hora_fin);
     
     // Usar el color del map.
-    const colorProfesional = colorMap[turno.nombre_empleado] || profesional?.color || colorMap["default"];
+    const colorProfesional = profesional?.color || '#525252';
     tarjeta.style.borderLeftColor = colorProfesional;
     // --- FIN DE MODIFICACIÓN 2 ---
 
@@ -284,17 +262,17 @@ function renderizarGrilla() {
       </div>
 
       <div class="info-profesional-hora">
-        ${profesional ? `
+        ${turno.nombre_empleado ? `
           <div class="profesional-turno">
             <svg class="icono" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="12" cy="7" r="4" stroke-width="2"/>
             </svg>
-            <span>${turno.nombre_empleado}</span>
+            <span>${turno.nombre_empleado.split(' ')[0]}</span>
           </div>
-        ` : "<div></div>"}
+        ` : ""}
         <div class="hora-turno-apilada">
-          <span class="hora-texto">${turno.hora}h</span>
+          <span class="hora-texto">${turno.hora.slice(0, 5)}h</span>
       
         </div>
       </div>
@@ -641,6 +619,9 @@ function setupModalCreacionListeners() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const btnSubmit = form.querySelector('[type="submit"]');
+    const restaurar = setBtnLoading(btnSubmit, 'Guardando...');
+
     const nombreCliente = document.getElementById("nombreCliente").value;
     const telefono = document.getElementById("telefono").value;
     const servicioId = selectServicio.value;
@@ -662,6 +643,7 @@ function setupModalCreacionListeners() {
     const cliente_id = await buscarOCrearCliente(nombreCliente, telefono);
 
     if (!cliente_id) {
+      restaurar();
       showNotification("Error al procesar el cliente. Intenta de nuevo.", "error");
       return;
     }
@@ -696,6 +678,7 @@ function setupModalCreacionListeners() {
 
     // 3. Llamar a la API de turnos
     const resultado = await createOrUpdateTurno(turnoData);
+    restaurar();
 
     if (resultado) {
       showNotification("Turno creado correctamente", "success");
@@ -859,6 +842,9 @@ function setupModalEdicionListeners(turno) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    const btnSubmit = form.querySelector('[type="submit"]');
+    const restaurar = setBtnLoading(btnSubmit, 'Guardando...');
+
     const horaInicio = inputHoraSelec.value; // "HH:MM"
     const fecha = inputFecha.value;
 
@@ -871,6 +857,7 @@ function setupModalEdicionListeners(turno) {
     const cliente_id = await buscarOCrearCliente(turno.nombre_cliente, turno.telefono_cliente);
 
     if (!cliente_id) {
+      restaurar();
       showNotification("Error al re-validar la información del cliente.", "error");
       return;
     }
@@ -902,6 +889,7 @@ function setupModalEdicionListeners(turno) {
 
 
     const resultado = await createOrUpdateTurno(turnoData);
+    restaurar();
 
     if (resultado) {
       showNotification("Turno actualizado correctamente", "success");

@@ -1,5 +1,5 @@
 import { estado } from "./estado.js"
-import { showNotification, confirmarAccion } from "./utilidades.js"
+import { showNotification, confirmarAccion, setBtnLoading } from "./utilidades.js"
 import { fetchClientes, updateCliente, deleteCliente } from "./api.js"
 
 let clientesFiltrados = []
@@ -30,7 +30,7 @@ function setupClientesEventListeners() {
         (cliente) =>
           cliente.nombre.toLowerCase().includes(termino) ||
           cliente.telefono.toLowerCase().includes(termino) ||
-          (cliente.email && cliente.email.toLowerCase().includes(termino)),
+          (cliente.preferencias && cliente.preferencias.toLowerCase().includes(termino)),
       )
       renderizarClientes()
     })
@@ -63,7 +63,7 @@ function renderizarClientes() {
       <div class="info-elemento">
         <h4>${cliente.nombre}</h4>
         <p>${cliente.telefono || 'Sin teléfono'}</p>
-        <small>${cliente.email || 'Sin email'}</small>
+        ${cliente.preferencias ? `<small>${cliente.preferencias}</small>` : ''}
       </div>
       <div class="acciones-elemento">
         <button class="boton-icono editar" data-cliente-id="${cliente.id}" title="Editar">
@@ -76,10 +76,9 @@ function renderizarClientes() {
     </div>
   `).join('')
 
-  listaClientes.querySelectorAll('.boton-icono.editar').forEach(btn => {
+  listaClientes.querySelectorAll('.boton-icono').forEach(btn => {
     btn.addEventListener('click', () => {
-     const clienteId = parseInt(btn.dataset.clienteId)
-      
+      const clienteId = parseInt(btn.dataset.clienteId)
       if (btn.classList.contains('editar')) {
         abrirModalCliente(clienteId)
       } else if (btn.classList.contains('eliminar')) {
@@ -102,8 +101,7 @@ export function abrirModalCliente(clienteId = null) {
     document.getElementById("cliente-id").value = cliente.id
     document.getElementById("cliente-nombre").value = cliente.nombre
     document.getElementById("cliente-telefono").value = cliente.telefono
-    document.getElementById("cliente-email").value = cliente.email || ""
-    document.getElementById("cliente-notas").value = cliente.notas || ""
+    document.getElementById("cliente-notas").value = cliente.preferencias || ""
   } else {
     titulo.textContent = "Nuevo Cliente"
     form.reset()
@@ -123,15 +121,19 @@ export function cerrarModalCliente() {
 export async function guardarCliente(e) {
   e.preventDefault()
 
+  const btn = e.target.closest('form')?.querySelector('[type="submit"]') ||
+               document.querySelector('#modal-cliente [type="submit"]')
+  const restaurar = setBtnLoading(btn)
+
   const clienteData = {
     id: document.getElementById("cliente-id").value || null,
     nombre: document.getElementById("cliente-nombre").value.trim(),
     telefono: document.getElementById("cliente-telefono").value.trim(),
-    email: document.getElementById("cliente-email").value.trim(),
-    notas: document.getElementById("cliente-notas").value.trim(),
+    preferencias: document.getElementById("cliente-notas").value.trim(),
   }
 
   const resultado = await updateCliente(clienteData)
+  restaurar()
   if (resultado) {
     showNotification(clienteData.id ? "Cliente actualizado correctamente" : "Cliente creado correctamente", "success")
     cerrarModalCliente()
@@ -145,7 +147,7 @@ export async function guardarCliente(e) {
 
 export async function eliminarClienteConfirm(clienteId) {
   const ok = await confirmarAccion(
-    '¿Estás seguro de que deseas eliminar este cliente? Esta acción no se puede deshacer.',
+    '¿Estás seguro? Se eliminará el cliente y todos sus turnos asociados. Esta acción no se puede deshacer.',
     'Eliminar cliente',
     'Sí, eliminar'
   )

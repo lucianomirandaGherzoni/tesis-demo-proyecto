@@ -1,31 +1,17 @@
 // ===================================================
 // auth.js — Sistema de autenticación (DEMO / FRONTEND)
-// TODO: reemplazar CREDENCIALES y lógica por JWT real
+// TODO: reemplazar lógica por JWT real en producción
 // ===================================================
 import { confirmarAccion } from './utilidades.js'
 
-// ─────────────────────────────────────────────────
-// CREDENCIALES HARDCODEADAS (solo demo)
-// ─────────────────────────────────────────────────
-const USUARIOS_DEMO = [
-  {
-    usuario:  'admin',
-    password: 'admin123',
-    nombre:   'Administrador',
-    rol:      'admin',
-    // Módulos permitidos (data-tab de los botones de navegación)
-    modulos:  ['agenda', 'financiero', 'clientes', 'servicios', 'empleados', 'usuarios'],
-  },
-  {
-    usuario:  'empleado',
-    password: 'empleado123',
-    nombre:   'Empleado Demo',
-    rol:      'empleado',
-    modulos:  ['agenda', 'clientes'],
-  },
-]
+const SESSION_KEY     = 'eleve_session'
+const LS_USUARIOS_KEY = 'eleve_usuarios'
 
-const SESSION_KEY = 'eleve_session'
+// Módulos permitidos según rol
+const MODULOS_POR_ROL = {
+  admin:    ['agenda', 'financiero', 'clientes', 'servicios', 'empleados', 'usuarios'],
+  empleado: ['agenda', 'clientes'],
+}
 
 // ─────────────────────────────────────────────────
 // HELPERS DE SESIÓN (sessionStorage → se borra al cerrar pestaña)
@@ -110,11 +96,27 @@ function _setupLoginForm() {
     const usuarioIngresado  = document.getElementById('login-usuario').value.trim()
     const passwordIngresada = inputPw ? inputPw.value : ''
 
-    const coincide = USUARIOS_DEMO.find(
-      (u) => u.usuario === usuarioIngresado && u.password === passwordIngresada
-    )
+    // Buscar en la "BD" (localStorage, sembrado desde usuarios.json)
+    let sesionData = null
+    try {
+      const raw = localStorage.getItem(LS_USUARIOS_KEY)
+      const storedUsers = raw ? JSON.parse(raw) : []
+      const match = storedUsers.find(
+        (u) => u.username === usuarioIngresado &&
+               u.passwordHash &&
+               atob(u.passwordHash) === passwordIngresada
+      )
+      if (match) {
+        sesionData = {
+          usuario: match.username,
+          nombre:  match.nombre,
+          rol:     match.tipo,
+          modulos: MODULOS_POR_ROL[match.tipo] || MODULOS_POR_ROL.empleado,
+        }
+      }
+    } catch { /* localStorage inaccesible */ }
 
-    if (!coincide) {
+    if (!sesionData) {
       if (errorDiv) {
         errorDiv.textContent = 'Usuario o contraseña incorrectos'
         errorDiv.classList.add('visible')
@@ -131,14 +133,7 @@ function _setupLoginForm() {
     // Credenciales correctas
     if (errorDiv) errorDiv.classList.remove('visible')
 
-    const sesion = {
-      usuario: coincide.usuario,
-      nombre:  coincide.nombre,
-      rol:     coincide.rol,
-      modulos: coincide.modulos,
-    }
-
-    guardarSesion(sesion)
+    guardarSesion(sesionData)
 
     // Animación de exit antes de ocultar
     const overlay = document.getElementById('login-overlay')
@@ -147,8 +142,8 @@ function _setupLoginForm() {
       overlay.addEventListener('animationend', () => {
         _ocultarOverlay()
         overlay.classList.remove('saliendo')
-        _aplicarPermisos(sesion)
-        _mostrarUsuarioEnHeader(sesion)
+        _aplicarPermisos(sesionData)
+        _mostrarUsuarioEnHeader(sesionData)
       }, { once: true })
     }
   })

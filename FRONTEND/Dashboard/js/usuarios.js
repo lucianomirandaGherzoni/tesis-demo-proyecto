@@ -3,7 +3,8 @@ import { showNotification, confirmarAccion } from './utilidades.js'
 // ───────────────────────────────────────────────
 // PERSISTENCIA LOCAL (localStorage)
 // ───────────────────────────────────────────────
-const LS_KEY = 'eleve_usuarios'
+const LS_KEY        = 'eleve_usuarios'
+const LS_SEEDED_KEY = 'eleve_db_seeded'
 
 function cargarDesdeStorage() {
   try {
@@ -23,10 +24,29 @@ let usuarios = cargarDesdeStorage()
 let usuariosFiltrados = [...usuarios]
 
 // ───────────────────────────────────────────────
+// SIEMBRA INICIAL DESDE JSON (simula BD)
+// Solo ocurre la primera vez (flag en localStorage)
+// ───────────────────────────────────────────────
+async function sembrarDesdeJSON() {
+  if (localStorage.getItem(LS_SEEDED_KEY)) return
+  try {
+    const res   = await fetch('./data/usuarios.json')
+    const datos = await res.json()
+    guardarEnStorage(datos)
+    localStorage.setItem(LS_SEEDED_KEY, '1')
+    usuarios          = datos
+    usuariosFiltrados = [...datos]
+  } catch (e) {
+    console.warn('[Eleve] No se pudo cargar usuarios.json:', e)
+  }
+}
+
+// ───────────────────────────────────────────────
 // INICIALIZACIÓN
 // ───────────────────────────────────────────────
-export function inicializarUsuarios() {
-  usuarios = cargarDesdeStorage()
+export async function inicializarUsuarios() {
+  await sembrarDesdeJSON()
+  usuarios          = cargarDesdeStorage()
   usuariosFiltrados = [...usuarios]
   setupEventListeners()
   renderizarUsuarios()
@@ -111,14 +131,12 @@ function renderizarUsuarios() {
 
     return `
       <div class="elemento-lista">
-        <div class="avatar-usuario ${esAdmin ? 'avatar-admin' : ''}">${iniciales}</div>
         <div class="info-elemento">
           <div class="nombre-con-estado">
             <h4>${u.nombre}</h4>
             <span class="badge-tipo-usuario ${badgeClase}">${badgeTexto}</span>
           </div>
-          <p>${u.email || 'Sin email'}</p>
-          <small>Creado: ${formatearFecha(u.creado)}</small>
+          ${u.username ? `<p>@${u.username}</p>` : ''}
         </div>
         <div class="acciones-elemento">
           <button class="boton-icono" data-id="${u.id}" data-accion="editar" title="Editar">
@@ -183,15 +201,17 @@ function abrirModal(id = null) {
     if (labelPass) labelPass.textContent = 'Nueva Contraseña (dejar vacío para no cambiar)'
     if (inputPass) inputPass.removeAttribute('required')
 
-    document.getElementById('usuario-id').value     = usuario.id
-    document.getElementById('usuario-nombre').value = usuario.nombre
-    document.getElementById('usuario-email').value  = usuario.email  || ''
-    document.getElementById('usuario-tipo').value   = usuario.tipo
+    document.getElementById('usuario-id').value       = usuario.id
+    document.getElementById('usuario-nombre').value   = usuario.nombre
+    document.getElementById('usuario-username').value = usuario.username || ''
+    document.getElementById('usuario-email').value    = usuario.email  || ''
+    document.getElementById('usuario-tipo').value     = usuario.tipo
   } else {
     titulo.textContent = 'Nuevo Usuario'
     if (labelPass) labelPass.textContent = 'Contraseña'
     if (inputPass) inputPass.setAttribute('required', '')
-    document.getElementById('usuario-id').value = ''
+    document.getElementById('usuario-id').value       = ''
+    document.getElementById('usuario-username').value = ''
   }
 
   modal.classList.add('activo')
@@ -212,12 +232,20 @@ async function guardarUsuario(e) {
 
   const id       = document.getElementById('usuario-id').value
   const nombre   = document.getElementById('usuario-nombre').value.trim()
+  const username = document.getElementById('usuario-username').value.trim().toLowerCase()
   const email    = document.getElementById('usuario-email').value.trim()
   const password = document.getElementById('usuario-password').value
   const tipo     = document.getElementById('usuario-tipo').value
 
-  if (!nombre || !tipo) {
-    showNotification('Nombre y tipo son obligatorios', 'error')
+  if (!nombre || !tipo || !username) {
+    showNotification('Nombre, usuario y tipo son obligatorios', 'error')
+    return
+  }
+
+  // Validar que el username no esté tomado por otro usuario
+  const duplicado = usuarios.find((u) => u.username === username && u.id !== id)
+  if (duplicado) {
+    showNotification(`El nombre de usuario "${username}" ya está en uso`, 'error')
     return
   }
 
@@ -236,6 +264,7 @@ async function guardarUsuario(e) {
     usuarios[idx] = {
       ...usuarios[idx],
       nombre,
+      username,
       email,
       tipo,
       modificado: new Date().toISOString(),
@@ -249,6 +278,7 @@ async function guardarUsuario(e) {
     const nuevoUsuario = {
       id:           crypto.randomUUID(),
       nombre,
+      username,
       email,
       tipo,
       passwordHash: btoa(password), // Codificación básica (no criptografía real)

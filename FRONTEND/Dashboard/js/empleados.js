@@ -1,6 +1,6 @@
 import { estado } from "./estado.js"
-import { showNotification, confirmarAccion } from "./utilidades.js"
-import { fetchProfesionales, createOrUpdateEmpleado, deleteEmpleado } from "./api.js"
+import { showNotification, confirmarAccion, setBtnLoading } from "./utilidades.js"
+import { dbGetEmpleados, dbSaveEmpleado, dbDeleteEmpleado } from "./db.js"
 
 let empleadosFiltrados = []
 
@@ -71,7 +71,7 @@ export async function inicializarEmpleados() {
 // MODIFICAR la función cargarEmpleados
 async function cargarEmpleados() {
   try {
-    estado.profesionales = await fetchProfesionales()
+    estado.profesionales = dbGetEmpleados()
     empleadosFiltrados = [...estado.profesionales]
     renderizarMetricasEmpleados()
   } catch (error) {
@@ -275,6 +275,10 @@ function obtenerHorarioActual() {
 export async function guardarEmpleado(e) {
   e.preventDefault()
 
+  const btn = e.target.closest('form')?.querySelector('[type="submit"]') ||
+               document.querySelector('#modal-empleado [type="submit"]')
+  const restaurar = setBtnLoading(btn)
+
   const empleadoData = {
     id: document.getElementById("empleado-id").value || null,
     nombre: document.getElementById("empleado-nombre").value.trim(),
@@ -283,9 +287,10 @@ export async function guardarEmpleado(e) {
     especialidad: document.getElementById("empleado-especialidad").value.trim(),
   }
 
-  const resultado = await createOrUpdateEmpleado(empleadoData)
+  const resultado = dbSaveEmpleado(empleadoData)
+  restaurar()
   if (resultado) {
-    const idFinal = resultado.id || resultado.empleado?.id || empleadoData.id
+    const idFinal = resultado.id || empleadoData.id
     if (idFinal) {
       setHorarioEmpleado(idFinal, obtenerHorarioActual())
     }
@@ -309,7 +314,7 @@ export async function eliminarEmpleadoConfirm(empleadoId) {
   )
   if (!ok) return
 
-  const resultado = await deleteEmpleado(empleadoId)
+  const resultado = dbDeleteEmpleado(empleadoId)
   if (resultado) {
     showNotification("Empleado eliminado correctamente", "success")
     await cargarEmpleados()

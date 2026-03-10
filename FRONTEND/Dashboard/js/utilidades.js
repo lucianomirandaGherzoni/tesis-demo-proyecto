@@ -145,6 +145,24 @@ export function puedeDiaAnterior(fechaActual) {
  * @param {string} titulo   - Título del popup (opcional).
  * @param {string} textoBtnOk - Texto del botón de confirmar (opcional).
  */
+/**
+ * Pone un botón en estado loading (deshabilita + cambia texto).
+ * Devuelve una función para restaurarlo.
+ * @param {HTMLButtonElement} btn
+ * @param {string} texto - Texto mientras carga. Default "Guardando..."
+ * @returns {() => void} restore - Llámala para volver al estado original.
+ */
+export function setBtnLoading(btn, texto = 'Guardando...') {
+  if (!btn) return () => {}
+  const textoOriginal = btn.innerHTML
+  btn.disabled = true
+  btn.innerHTML = `<span class="spinner-btn"></span>${texto}`
+  return () => {
+    btn.disabled = false
+    btn.innerHTML = textoOriginal
+  }
+}
+
 export function confirmarAccion(
   mensaje,
   titulo    = '¿Confirmar acción?',

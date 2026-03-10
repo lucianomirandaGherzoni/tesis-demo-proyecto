@@ -130,9 +130,18 @@ async function actualizarCliente(id, datos) {
     }
 }
 
-// Función para eliminar un cliente
+// Función para eliminar un cliente (y sus turnos asociados)
 async function eliminarCliente(id) {
     try {
+        // Primero eliminar los turnos que referencian a este cliente
+        const { error: errorTurnos } = await supabaseAdmin
+            .from('turnos')
+            .delete()
+            .eq('cliente_id', id);
+
+        if (errorTurnos) throw errorTurnos;
+
+        // Luego eliminar el cliente
         const { error } = await supabaseAdmin
             .from('clientes')
             .delete()

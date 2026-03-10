@@ -8,7 +8,24 @@ import { formatCurrency } from './utilidades.js';
 const datosSimulados = {
     // Datos de KPIs que cambian por período
     kpis: {
-        week: { // Dejamos 'week' y 'month' como IDs de filtro
+        day: {
+            ingresosTotales: 1250,
+            cambioIngresos: 5.2,
+            turnosTotales: 28,
+            ingresoPromedioPorTurno: 44,
+            tasaOcupacion: 91,
+            horasTotales: 18,
+            fidelidad: {
+                nuevos: 4,
+                recurrentes: 24
+            },
+            estadoTurnos: {
+                completados: 26,
+                cancelados: 1,
+                ausentes: 1
+            }
+        },
+        week: {
             ingresosTotales: 6660,
             cambioIngresos: 10.8,
             turnosTotales: 180,
@@ -45,6 +62,13 @@ const datosSimulados = {
     },
     // Datos para el gráfico de barras de empleados
     serviciosPorEmpleado: {
+        day: [
+            { nombre: 'Ana', cantidad: 7 },
+            { nombre: 'Carlos', cantidad: 6 },
+            { nombre: 'Lucía', cantidad: 6 },
+            { nombre: 'Marcos', cantidad: 5 },
+            { nombre: 'Sofía', cantidad: 4 }
+        ],
         week: [
             { nombre: 'Ana', cantidad: 45 },
             { nombre: 'Carlos', cantidad: 42 },
@@ -62,6 +86,13 @@ const datosSimulados = {
     },
     // Ingresos por Empleado
     ingresosPorEmpleado: {
+        day: [
+            { nombre: 'Ana', monto: 320 },
+            { nombre: 'Carlos', monto: 290 },
+            { nombre: 'Lucía', monto: 270 },
+            { nombre: 'Marcos', monto: 230 },
+            { nombre: 'Sofía', monto: 140 }
+        ],
         week: [
             { nombre: 'Ana', monto: 1800 },
             { nombre: 'Carlos', monto: 1650 },
@@ -79,6 +110,13 @@ const datosSimulados = {
     },
     // Ocupación por Empleado (%)
     ocupacionPorEmpleado: {
+        day: [
+            { nombre: 'Ana', porcentaje: 95 },
+            { nombre: 'Carlos', porcentaje: 90 },
+            { nombre: 'Lucía', porcentaje: 88 },
+            { nombre: 'Marcos', porcentaje: 80 },
+            { nombre: 'Sofía', porcentaje: 70 }
+        ],
         week: [
             { nombre: 'Ana', porcentaje: 92 },
             { nombre: 'Carlos', porcentaje: 87 },
@@ -96,6 +134,15 @@ const datosSimulados = {
     },
     // Turnos por Hora
     turnosPorHora: {
+        day: [
+            { hora: '09:00', cantidad: 2 },
+            { hora: '10:00', cantidad: 4 },
+            { hora: '11:00', cantidad: 5 },
+            { hora: '14:00', cantidad: 3 },
+            { hora: '15:00', cantidad: 6 },
+            { hora: '16:00', cantidad: 7 },
+            { hora: '17:00', cantidad: 3 }
+        ],
         week: [
             { hora: '09:00', cantidad: 10 },
             { hora: '10:00', cantidad: 25 },
