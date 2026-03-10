@@ -1,6 +1,7 @@
 import { estado } from "./estado.js"
 import { showNotification, formatCurrency, confirmarAccion, setBtnLoading } from "./utilidades.js"
 import { dbGetServicios, dbSaveServicio, dbDeleteServicio } from "./db.js"
+import { fetchServicios } from "./api.js"
 
 let serviciosFiltrados = []
 
@@ -50,11 +51,14 @@ export async function inicializarServicios() {
 
 async function cargarServicios() {
   try {
-    estado.servicios = dbGetServicios()
+    const serviciosAPI = await fetchServicios();
+    estado.servicios = serviciosAPI.length > 0 ? serviciosAPI : dbGetServicios();
     serviciosFiltrados = [...estado.servicios]
     actualizarMetricasServicios()
   } catch (error) {
     console.error("Error al cargar servicios", error)
+    estado.servicios = dbGetServicios()
+    serviciosFiltrados = [...estado.servicios]
     showNotification("Error al cargar servicios", "error")
   }
 }
@@ -111,7 +115,7 @@ function renderizarServicios() {
     <div class="elemento-lista" data-id="${servicio.id}">
       <div class="info-elemento">
         <h4>${servicio.nombre}</h4>
-        <p>Duración: ${servicio.duracion} min | Precio: $${servicio.precio}</p>
+        <p>Duración: ${servicio.duracion_min ?? servicio.duracion} min | Precio: $${servicio.precio}</p>
         <div class="pros-asignados-lista">${buildProsHTML(servicio.id)}</div>
       </div>
       <div class="acciones-elemento">
@@ -201,7 +205,7 @@ export function abrirModalServicio(servicioId = null) {
     document.getElementById("servicio-nombre").value = servicio.nombre
     document.getElementById("servicio-descripcion").value = servicio.descripcion || ""
     document.getElementById("servicio-precio").value = servicio.precio
-    document.getElementById("servicio-duracion").value = servicio.duracion
+    document.getElementById("servicio-duracion").value = servicio.duracion_min ?? servicio.duracion
   } else {
     titulo.textContent = "Nuevo Servicio"
     form.reset()

@@ -47,6 +47,11 @@ function setupClientesEventListeners() {
   if (btnCerrarModal) {
     btnCerrarModal.addEventListener('click', cerrarModalCliente)
   }
+
+  const formCliente = document.getElementById('form-cliente')
+  if (formCliente) {
+    formCliente.addEventListener('submit', guardarCliente)
+  }
 }
 
 function renderizarClientes() {

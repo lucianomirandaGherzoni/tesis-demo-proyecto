@@ -42,9 +42,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   estado.isLoading = true;
 
-  // Cargar profesionales y servicios desde la BD local (ya sembrada arriba)
-  estado.profesionales = dbGetEmpleados();
-  estado.servicios = dbGetServicios();
+  // Cargar profesionales desde Supabase (IDs reales) + colores del JSON local por nombre
+  const coloresLocales = dbGetEmpleados();
+  const profesionalesAPI = await api.fetchProfesionales().catch(() => []);
+  if (profesionalesAPI.length > 0) {
+    estado.profesionales = profesionalesAPI.map(p => {
+      const local = coloresLocales.find(l => l.nombre.toLowerCase() === p.nombre.toLowerCase());
+      return { ...p, color: local?.color || '#525252' };
+    });
+  } else {
+    estado.profesionales = coloresLocales;
+  }
+
+  // Cargar servicios desde Supabase (IDs reales), fallback a JSON local
+  const serviciosAPI = await api.fetchServicios().catch(() => []);
+  estado.servicios = serviciosAPI.length > 0 ? serviciosAPI : dbGetServicios();
+
   if (estado.profesionales.length > 0) {
     estado.profesionalSeleccionado = 'pendiente';
   }
@@ -59,10 +72,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Mutamos el estado global con los datos cargados
     estado.dashboardStats = dashboardStats;
     estado.financialData = financialData;
-
-    if (estado.profesionales.length > 0) {
-      estado.profesionalSeleccionado = 'pendiente';
-    }
 
     // Carga de turnos (depende de la fecha y profesional)
     const [turnos, turnosPendientesCount] = await Promise.all([

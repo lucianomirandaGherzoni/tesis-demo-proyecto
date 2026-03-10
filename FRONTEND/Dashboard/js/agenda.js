@@ -234,7 +234,8 @@ function renderizarGrilla() {
 
   turnosConPosicion.forEach((turno) => {
     // --- INICIO DE MODIFICACIÓN 2: Lógica de color ---
-    const profesional = estado.profesionales.find(p => p.nombre === turno.nombre_empleado);
+    const profesional = estado.profesionales.find(p => String(p.id) === String(turno.empleado_id))
+                     || estado.profesionales.find(p => p.nombre === turno.nombre_empleado);
     const estilo = obtenerEstiloTurno(turno.hora, turno.hora_fin, alturaSlot);
     const tarjeta = document.createElement("div");
     tarjeta.className = "tarjeta-turno";
@@ -705,7 +706,7 @@ function setupModalCreacionListeners() {
 function setupModalEdicionListeners(turno) {
   // Encontrar el servicio y profesional ID basado en los nombres
   const servicioSeleccionado = estado.servicios.find(s => s.nombre === turno.nombre_servicio);
-  const profesionalSeleccionado = estado.profesionales.find(p => p.nombre === turno.nombre_empleado);
+  const profesionalSeleccionado = estado.profesionales.find(p => String(p.id) === String(turno.empleado_id));
 
   // Selectores
   const form = document.getElementById("formEdicion");
