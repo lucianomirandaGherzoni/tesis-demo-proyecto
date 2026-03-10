@@ -57,7 +57,7 @@ async function cargarServicios() {
     actualizarMetricasServicios()
   } catch (error) {
     console.error("Error al cargar servicios", error)
-    estado.servicios = dbGetServicios()
+    estado.servicios = dbGetServicios();
     serviciosFiltrados = [...estado.servicios]
     showNotification("Error al cargar servicios", "error")
   }

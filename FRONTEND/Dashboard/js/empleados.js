@@ -1,6 +1,7 @@
 import { estado } from "./estado.js"
 import { showNotification, confirmarAccion, setBtnLoading } from "./utilidades.js"
 import { dbGetEmpleados, dbSaveEmpleado, dbDeleteEmpleado } from "./db.js"
+import { fetchProfesionales } from "./api.js"
 
 let empleadosFiltrados = []
 
@@ -68,10 +69,20 @@ export async function inicializarEmpleados() {
   renderizarMetricasEmpleados()
 }
 
-// MODIFICAR la función cargarEmpleados
+const COLORES_PROF = { 'bautista': '#1a1a1a', 'ciro': '#2f6d4e', 'felipe': '#a34b20', 'ricardo': '#2c4ea3' };
+const PALETA_EMP = ['#1a1a1a', '#2f6d4e', '#a34b20', '#2c4ea3', '#6b2fa0', '#b5461a'];
+
 async function cargarEmpleados() {
   try {
-    estado.profesionales = dbGetEmpleados()
+    const profesionalesAPI = await fetchProfesionales();
+    if (profesionalesAPI.length > 0) {
+      estado.profesionales = profesionalesAPI.map((p, i) => ({
+        ...p,
+        color: COLORES_PROF[p.nombre.split(' ')[0].toLowerCase()] || PALETA_EMP[i % PALETA_EMP.length]
+      }));
+    } else {
+      estado.profesionales = dbGetEmpleados();
+    }
     empleadosFiltrados = [...estado.profesionales]
     renderizarMetricasEmpleados()
   } catch (error) {

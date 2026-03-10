@@ -42,21 +42,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   estado.isLoading = true;
 
-  // Cargar profesionales desde Supabase (IDs reales) + colores del JSON local por nombre
-  const coloresLocales = dbGetEmpleados();
-  const profesionalesAPI = await api.fetchProfesionales().catch(() => []);
-  if (profesionalesAPI.length > 0) {
-    estado.profesionales = profesionalesAPI.map(p => {
-      const local = coloresLocales.find(l => l.nombre.toLowerCase() === p.nombre.toLowerCase());
-      return { ...p, color: local?.color || '#525252' };
-    });
-  } else {
-    estado.profesionales = coloresLocales;
-  }
+  // Colores asignados por nombre (el backend no devuelve color)
+  const COLORES_PROF = { 'bautista': '#1a1a1a', 'ciro': '#2f6d4e', 'felipe': '#a34b20', 'ricardo': '#2c4ea3' };
+  const PALETA = ['#1a1a1a', '#2f6d4e', '#a34b20', '#2c4ea3', '#6b2fa0', '#b5461a'];
 
-  // Cargar servicios desde Supabase (IDs reales), fallback a JSON local
-  const serviciosAPI = await api.fetchServicios().catch(() => []);
-  estado.servicios = serviciosAPI.length > 0 ? serviciosAPI : dbGetServicios();
+  // Cargar profesionales y servicios desde el backend
+  const [profesionalesAPI, serviciosAPI] = await Promise.all([
+    api.fetchProfesionales().catch(() => []),
+    api.fetchServicios().catch(() => [])
+  ]);
+
+  estado.profesionales = profesionalesAPI.map((p, i) => ({
+    ...p,
+    color: COLORES_PROF[p.nombre.split(' ')[0].toLowerCase()] || PALETA[i % PALETA.length]
+  }));
+  estado.servicios = serviciosAPI;
 
   if (estado.profesionales.length > 0) {
     estado.profesionalSeleccionado = 'pendiente';
